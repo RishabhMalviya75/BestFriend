@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-pink: #FFF5F7;
+    --accent-red: #FF4D6D;
+    --accent-green: #2EC4B6;
+  }
+
+  body {
+    background-color: #FFF5F7;
+    color: #4A3E4E;
+    font-family: var(--font-nunito), system-ui, sans-serif;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+}
+
+.font-cursive {
+  font-family: var(--font-dancing), 'Dancing Script', cursive;
+}
+
+.font-ui {
+  font-family: var(--font-nunito), 'Nunito', sans-serif;
+}
+
+/* Custom Soft Pink Shadows & Glassmorphism */
+.pink-card-shadow {
+  box-shadow: 0 20px 40px -15px rgba(255, 77, 109, 0.15), 0 0 15px 0 rgba(255, 182, 193, 0.25);
+}
+
+.pink-glow {
+  box-shadow: 0 0 25px rgba(255, 77, 109, 0.4);
+}
+
+.green-glow {
+  box-shadow: 0 0 25px rgba(46, 196, 182, 0.4);
+}
+
+/* Vintage Stationery Background Pattern */
+.stationery-bg {
+  background-color: #FFFDF9;
+  background-image: radial-gradient(#F5E6E8 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Vinyl Spinning Animation */
+@keyframes spinSlow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spinSlow 12s linear infinite;
+}
+
+.animate-spin-paused {
+  animation-play-state: paused;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #FFF5F7;
+}
+::-webkit-scrollbar-thumb {
+  background: #FFB3C1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #FF4D6D;
+}
