@@ -37,9 +37,17 @@ export function extractYouTubeId(input: string): string {
 
 /**
  * Encodes GiftData into a base64 URL-safe string for sharing.
+ * Defensively filters out any base64 Data URLs so they never bloat the payload.
  */
 export function encodeGiftData(data: GiftData): string {
-  const json = JSON.stringify(data);
+  const sanitizedPhotos = (data.photos || []).filter(
+    (url) => typeof url === "string" && (url.startsWith("http://") || url.startsWith("https://"))
+  );
+  const cleanData: GiftData = {
+    ...data,
+    photos: sanitizedPhotos,
+  };
+  const json = JSON.stringify(cleanData);
   if (typeof window !== "undefined") {
     return btoa(encodeURIComponent(json));
   }
@@ -55,9 +63,12 @@ export function decodeGiftData(encoded: string): GiftData | null {
     const json = decodeURIComponent(atob(encoded));
     const parsed = JSON.parse(json) as GiftData;
     if (!parsed.partnerName || !parsed.youtubeUrl) return null;
+    const validPhotos = Array.isArray(parsed.photos)
+      ? parsed.photos.filter((url) => typeof url === "string" && (url.startsWith("http://") || url.startsWith("https://")))
+      : [];
     return {
       partnerName: parsed.partnerName || DEFAULT_GIFT_DATA.partnerName,
-      photos: Array.isArray(parsed.photos) ? parsed.photos : [],
+      photos: validPhotos,
       youtubeUrl: parsed.youtubeUrl || DEFAULT_GIFT_DATA.youtubeUrl,
       letterContent: parsed.letterContent || DEFAULT_GIFT_DATA.letterContent,
     };
@@ -65,3 +76,4 @@ export function decodeGiftData(encoded: string): GiftData | null {
     return null;
   }
 }
+
