@@ -45,6 +45,7 @@ export const CreateModal: React.FC<CreateModalProps> = ({ onClose, onApply, init
 
   const [photoInput, setPhotoInput] = useState("");
   const [generatedLink, setGeneratedLink] = useState("");
+  const [shortening, setShortening] = useState(false);
   const [copied, setCopied] = useState(false);
   const [applied, setApplied] = useState(false);
   const [activeTab, setActiveTab] = useState<"name" | "photos" | "music" | "letter">("name");
@@ -168,8 +169,27 @@ export const CreateModal: React.FC<CreateModalProps> = ({ onClose, onApply, init
         .map((p) => p.remoteUrl!),
     };
     const encoded = encodeGiftData(shareableForm);
-    const url = `${window.location.origin}${window.location.pathname}?data=${encoded}`;
+    const baseUrl = `${window.location.origin}${window.location.pathname}`;
+    const url = encoded ? `${baseUrl}?data=${encoded}` : baseUrl;
     setGeneratedLink(url);
+  };
+
+  const handleShortenLink = async () => {
+    if (!generatedLink || shortening || generatedLink.includes("tinyurl.com")) return;
+    setShortening(true);
+    try {
+      const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(generatedLink)}`);
+      if (res.ok) {
+        const shortUrl = await res.text();
+        if (shortUrl && shortUrl.startsWith("http")) {
+          setGeneratedLink(shortUrl.trim());
+        }
+      }
+    } catch {
+      // Fallback to original compressed URL
+    } finally {
+      setShortening(false);
+    }
   };
 
   const handleCopy = async () => {
@@ -575,6 +595,17 @@ export const CreateModal: React.FC<CreateModalProps> = ({ onClose, onApply, init
                     value={generatedLink}
                     className="flex-1 px-4 py-2.5 rounded-2xl border-2 border-pink-200 text-xs text-[#4A3E4E] font-mono bg-white focus:outline-none"
                   />
+                  {!generatedLink.includes("tinyurl.com") && (
+                    <motion.button
+                      onClick={handleShortenLink}
+                      disabled={shortening}
+                      whileTap={{ scale: 0.92 }}
+                      className="px-3 py-2.5 rounded-2xl border-2 border-pink-200 hover:border-[#FF4D6D] bg-white font-bold text-xs text-[#FF4D6D] flex items-center gap-1 cursor-pointer transition-all disabled:opacity-50"
+                      title="Make link even shorter using TinyURL"
+                    >
+                      {shortening ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Shorten ✂️"}
+                    </motion.button>
+                  )}
                   <motion.button
                     onClick={handleCopy}
                     whileTap={{ scale: 0.92 }}
