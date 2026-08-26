@@ -2,7 +2,7 @@
 
 An interactive, customizable Next.js web application designed to create unforgettable proposal moments and personalized digital gift experiences. 
 
-![LoveProposal Banner](https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=1200&auto=format&fit=crop)
+![LoveProposal Banner]((public/banner.jpg))
 
 ---
 
