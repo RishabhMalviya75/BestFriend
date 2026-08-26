@@ -2,8 +2,8 @@
 
 An interactive, customizable Next.js web application designed to create unforgettable proposal moments and personalized digital gift experiences. 
 
-![LoveProposal Banner](<img width="720" height="873" alt="salmonbhoi" src="https://github.com/user-attachments/assets/3c058a8d-5922-4d02-aebf-dd42fe141715" />
-)
+<img width="720" height="873" alt="salmonbhoi" src="https://github.com/user-attachments/assets/3c058a8d-5922-4d02-aebf-dd42fe141715" />
+
 
 ---
 
