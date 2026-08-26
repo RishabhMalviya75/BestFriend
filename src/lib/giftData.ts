@@ -1,5 +1,6 @@
 // src/lib/giftData.ts
 // Central GiftData interface and utilities for URL encoding/decoding
+import LZString from "lz-string";
 
 export interface GiftData {
   partnerName: string;
@@ -16,6 +17,14 @@ export const DEFAULT_GIFT_DATA: GiftData = {
 
 Being with you feels like home. In the quiet moments and the loud ones, in laughter and in silence, I find comfort in you. You make me feel understood, supported, and deeply loved, and that is something I will never take for granted.`,
 };
+
+/** Compact internal interface for URL encoding to minimize JSON footprint */
+interface CompactGiftData {
+  n?: string; // partnerName
+  p?: string[]; // photos
+  y?: string; // youtubeUrl
+  l?: string; // letterContent
+}
 
 /**
  * Extracts the YouTube video ID from various URL formats or plain IDs.
@@ -36,32 +45,97 @@ export function extractYouTubeId(input: string): string {
 }
 
 /**
- * Encodes GiftData into a base64 URL-safe string for sharing.
+ * Encodes GiftData into a compact, compressed URL-safe string.
+ * Omits unchanged default values, uses single-character JSON keys,
+ * and compresses using LZ-String for maximum URL length reduction.
  */
 export function encodeGiftData(data: GiftData): string {
-  const json = JSON.stringify(data);
-  if (typeof window !== "undefined") {
-    return btoa(encodeURIComponent(json));
+  const sanitizedPhotos = (data.photos || []).filter(
+    (url) => typeof url === "string" && (url.startsWith("http://") || url.startsWith("https://"))
+  );
+
+  const compact: CompactGiftData = {};
+
+  const cleanName = (data.partnerName || "").trim();
+  if (cleanName && cleanName !== DEFAULT_GIFT_DATA.partnerName) {
+    compact.n = cleanName;
   }
-  return "";
+
+  if (sanitizedPhotos.length > 0) {
+    compact.p = sanitizedPhotos;
+  }
+
+  const extractedYt = extractYouTubeId(data.youtubeUrl);
+  if (extractedYt && extractedYt !== DEFAULT_GIFT_DATA.youtubeUrl) {
+    compact.y = extractedYt;
+  }
+
+  const cleanLetter = (data.letterContent || "").trim();
+  if (cleanLetter && cleanLetter !== DEFAULT_GIFT_DATA.letterContent) {
+    compact.l = cleanLetter;
+  }
+
+  const json = JSON.stringify(compact);
+  return LZString.compressToEncodedURIComponent(json);
 }
 
 /**
- * Decodes a base64 URL-safe string back into GiftData.
- * Returns null if decoding fails.
+ * Decodes a compressed or legacy base64 string back into GiftData.
+ * Fully backward-compatible with older Base64 encoded links.
  */
 export function decodeGiftData(encoded: string): GiftData | null {
+  if (!encoded) return null;
+
+  let jsonStr: string | null = null;
+
+  // 1. Try LZString decompression
   try {
-    const json = decodeURIComponent(atob(encoded));
-    const parsed = JSON.parse(json) as GiftData;
-    if (!parsed.partnerName || !parsed.youtubeUrl) return null;
+    const decompressed = LZString.decompressFromEncodedURIComponent(encoded);
+    if (decompressed && (decompressed.startsWith("{") || decompressed.startsWith("["))) {
+      jsonStr = decompressed;
+    }
+  } catch {
+    // Ignore LZ-string decompression errors
+  }
+
+  // 2. Fallback for legacy Base64 encoded URLs
+  if (!jsonStr) {
+    try {
+      jsonStr = decodeURIComponent(atob(encoded));
+    } catch {
+      try {
+        jsonStr = atob(encoded);
+      } catch {
+        jsonStr = null;
+      }
+    }
+  }
+
+  if (!jsonStr) return null;
+
+  try {
+    const parsed = JSON.parse(jsonStr) as Record<string, any>;
+    if (typeof parsed !== "object" || parsed === null) return null;
+
+    // Handle both compact keys (n, p, y, l) and legacy full keys
+    const partnerName = parsed.n || parsed.partnerName || DEFAULT_GIFT_DATA.partnerName;
+    const youtubeUrl = parsed.y || parsed.youtubeUrl || DEFAULT_GIFT_DATA.youtubeUrl;
+    const letterContent = parsed.l || parsed.letterContent || DEFAULT_GIFT_DATA.letterContent;
+    
+    const rawPhotos = parsed.p || parsed.photos || [];
+    const validPhotos = Array.isArray(rawPhotos)
+      ? rawPhotos.filter((url) => typeof url === "string" && (url.startsWith("http://") || url.startsWith("https://")))
+      : [];
+
     return {
-      partnerName: parsed.partnerName || DEFAULT_GIFT_DATA.partnerName,
-      photos: Array.isArray(parsed.photos) ? parsed.photos : [],
-      youtubeUrl: parsed.youtubeUrl || DEFAULT_GIFT_DATA.youtubeUrl,
-      letterContent: parsed.letterContent || DEFAULT_GIFT_DATA.letterContent,
+      partnerName,
+      photos: validPhotos,
+      youtubeUrl,
+      letterContent,
     };
   } catch {
     return null;
   }
 }
+
+
