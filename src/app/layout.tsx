@@ -15,7 +15,7 @@ const dancingScript = Dancing_Script({
 });
 
 export const metadata: Metadata = {
-  title: "Do You Love Me? ❤️ | Special Interactive Gift",
+  title: "| Special Interactive Gift",
   description: "An interactive proposal and romantic gift hub created with love.",
 };
 
