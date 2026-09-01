@@ -12,7 +12,7 @@ interface MusicPlayerViewProps {
 
 export const MusicPlayerView: React.FC<MusicPlayerViewProps> = ({
   onBack,
-  youtubeUrl = "HgGAzBDE454",
+  youtubeUrl = "ZZrM0H_OXSQ",
 }) => {
   const [isPlaying, setIsPlaying] = useState(true);
 
