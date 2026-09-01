@@ -12,7 +12,7 @@ export interface GiftData {
 export const DEFAULT_GIFT_DATA: GiftData = {
   partnerName: "My Love",
   photos: [],
-  youtubeUrl: "HgGAzBDE454",
+  youtubeUrl: "ZZrM0H_OXSQ",
   letterContent: `Today is Valentine's Day, and I just want you to know how grateful I am to have you in my life. From the moment you came into my world, everything felt warmer, kinder, and more meaningful. You make ordinary moments feel special just by being you. No matter where life takes us, you will always be my favorite place to be. Loving you is the easiest and most wonderful thing I know.
 
 Being with you feels like home. In the quiet moments and the loud ones, in laughter and in silence, I find comfort in you. You make me feel understood, supported, and deeply loved, and that is something I will never take for granted.`,
